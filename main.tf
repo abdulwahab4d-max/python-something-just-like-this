@@ -1,7 +1,7 @@
 # Create or import your SSH key pair
 resource "aws_key_pair" "python-something-just-like-this" {
   key_name   = "python-something-just-like-this"
-  public_key = var.ssh_public_key   # taking ssh key fro repository secret
+  public_key = var.ssh_public_key   # taking ssh key fro repository secrets
 }
 
 # Security group for HTTP + SSH
