@@ -71,7 +71,7 @@ jobs:
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ env.EC2_PUBLIC_IP }}
-        username: ubuntu
+        username: ubuntu-python
         key: ${{ secrets.EC2_SSH_KEY }}
         debug: true
         script: |
@@ -89,8 +89,8 @@ jobs:
 
           echo "Docker is fully installed and running!"
 
-          sudo docker stop my-app || true
-          sudo docker rm my-app || true
+          sudo docker stop my-app-python || true
+          sudo docker rm my-app-python || true
 
           sudo docker pull abdulwahab4d/python-something-just-like-this:latest
           sudo docker run -d --name my-app-python -p 8080:8080 abdulwahab4d/python-something-just-like-this:latest

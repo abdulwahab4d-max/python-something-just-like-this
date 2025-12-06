@@ -31,7 +31,7 @@ resource "aws_security_group" "allow_http" {
   }
 }
 
-resource "aws_instance" "ubuntu" {
+resource "aws_instance" "ubuntu-python" {
   ami           = "ami-0fa91bc90632c73c9"
   instance_type = "t3.micro"
 
