@@ -3,7 +3,7 @@ name: Terraform CI/CD
 on:
   push:
     branches:
-      - master  # or whichever branch you're using
+      - master
 
 jobs:
   terraform:
@@ -13,38 +13,60 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    # Configure AWS credentials for Terraform AND aws cli
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-north-1
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
+      
+    - name: Debug SSH Key
+      run: |
+        if [ -z "${{ secrets.SSH_PUBLIC_KEY }}" ]; then
+          echo "SECRET MISSING!"
+        else
+          echo "SECRET PRESENT"
+        fi      
 
     - name: Terraform Init
-      run: terraform init # Add the directory path if needed
-
+      run: terraform init
+      env:
+        TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+        
     - name: Terraform Plan
       run: terraform plan
+      env:
+        TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
 
     - name: Terraform Apply
       run: terraform apply -auto-approve
+      env:
+        TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
 
-      # Get EC2 public IP dynamically (PLACE YOUR STEP HERE)
+    # Get EC2 Public IP dynamically
     - name: Get EC2 Public IP dynamically
       id: get_ip
       run: |
-          PUBLIC_IP=$(aws ec2 describe-instances \
-            --region eu-north-1 \
-            --filters "Name=instance-state-name,Values=running" \
-            --query "Reservations[0].Instances[0].PublicIpAddress" \
-            --output text)
-          echo "EC2_PUBLIC_IP=$PUBLIC_IP" >> $GITHUB_ENV
-          echo "Using EC2 IP: $PUBLIC_IP"
-          
+        PUBLIC_IP=$(aws ec2 describe-instances \
+          --region eu-north-1 \
+          --filters "Name=instance-state-name,Values=running" \
+          --query "Reservations[0].Instances[0].PublicIpAddress" \
+          --output text)
+        echo "EC2_PUBLIC_IP=$PUBLIC_IP" >> $GITHUB_ENV
+        echo "Using EC2 IP: $PUBLIC_IP"
+
     - name: Wait for SSH to be available
       run: |
         until nc -zv ${{ env.EC2_PUBLIC_IP }} 22; do
           echo "Waiting for SSH..."
           sleep 5
         done
-        
-       # SSH into EC2 and deploy
+
+    # SSH into EC2 and deploy
     - name: SSH to EC2 and deploy
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -58,7 +80,7 @@ jobs:
             echo "Docker not installed yet. Waiting..."
             sleep 5
           done
-          
+
           echo "Docker command exists. Waiting for Docker daemon..."
           until sudo docker ps >/dev/null 2>&1; do
             echo "Docker daemon not ready. Waiting..."
@@ -66,20 +88,9 @@ jobs:
           done
 
           echo "Docker is fully installed and running!"
-          
-          # Optional: stop the container if running
+
           sudo docker stop my-app || true
           sudo docker rm my-app || true
 
-          # Pull the latest image from Docker registry
           sudo docker pull abdulwahab4d/python-something-just-like-this:latest
-
-          # Run the container (replace ports/env as needed)
           sudo docker run -d --name my-app-python -p 8080:8080 abdulwahab4d/python-something-just-like-this:latest
-          
-          
-        
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}

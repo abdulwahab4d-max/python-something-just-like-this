@@ -1,6 +1,6 @@
 # Create or import your SSH key pair
-resource "aws_key_pair" "mykey" {
-  key_name   = "mykey"
+resource "aws_key_pair" "python-something-just-like-this" {
+  key_name   = "python-something-just-like-this"
   public_key = var.ssh_public_key   # taking ssh key fro repository secret
 }
 
@@ -36,7 +36,7 @@ resource "aws_instance" "ubuntu" {
   instance_type = "t3.micro"
 
   # 🟢 Add the SSH key here
-  key_name = aws_key_pair.mykey.key_name
+  key_name = aws_key_pair.python-something-just-like-this.key_name
 
   # Attach the security group
   vpc_security_group_ids = [aws_security_group.allow_http.id]
