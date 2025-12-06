@@ -4,6 +4,7 @@ provider "aws" {
   region = "eu-north-1"  # Change to your desired region
 }
 
+# bucket 
 terraform {
   backend "s3" {
     bucket = "terraform-bucket-aw123"
