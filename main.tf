@@ -54,7 +54,6 @@ resource "aws_instance" "ubuntu" {
     systemctl start docker
     systemctl enable docker
     
-    sudo docker pull abdulwahab4d/python-something-just-like-this:latest
     sudo apt update
     sudo apt install python3
     sudo apt install python3-pip
