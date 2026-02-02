@@ -8,7 +8,7 @@ provider "aws" {
 terraform {
   backend "s3" {
     bucket = "terraform-bucket-aw123"
-    key = "something-just-like-this/terraform.tfstate"
+    key = "nexskill-final-project/terraform.tfstate"
     region = "eu-north-1"
   }
 }
@@ -21,5 +21,3 @@ output "ec2_public_ip" {
 variable "ssh_public_key" {
   type      = string
 }
-
-

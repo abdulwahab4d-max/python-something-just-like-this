@@ -61,5 +61,6 @@ resource "aws_instance" "ubuntu-python" {
     python3 -m venv myenv
     python3 lyrics.py
     source myenv/bin/activate
+    sudo docker ps -a
   EOF
 }
